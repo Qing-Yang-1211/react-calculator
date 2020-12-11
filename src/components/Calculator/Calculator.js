@@ -91,16 +91,59 @@ class Calculator extends Component {
     }
   }
 
+  getOperationResult = (currentValue, inputValue, operatorType) => {
+    let newValue = null;
+    switch (operatorType) {
+      case "+":
+        newValue = currentValue + inputValue;
+        break;
+      case "−":
+        newValue = currentValue - inputValue;
+        break;
+      case "÷":
+        newValue = inputValue === 0 ? "error" : currentValue / inputValue;
+        break;
+      case "×":
+        newValue = currentValue * inputValue;
+        break;
+      case "=":
+        newValue = inputValue;
+        break;
+      case "√":
+        newValue = inputValue >= 0 ? Math.sqrt(inputValue) : "error";
+        break;
+      case "x²":
+        newValue = inputValue * inputValue;
+        break;
+      case "x³":
+        newValue = inputValue * inputValue * inputValue;
+        break;
+      case "x!":
+        // Recursion
+        let fac = (n) => {
+          return n > 1 ? n * fac(n - 1) : 1;
+        };
+        newValue = fac(inputValue);
+        break;
+      default:
+        break;
+    }
+    return newValue;
+  };
+
   performOperation(nextOperator) {
     const { value, displayValue, operator, waitingForOperand } = this.state;
     const noInputEqual = otherOperators.includes(nextOperator);
-    
+
+    // Same operator, no calculation
     if (nextOperator === operator && waitingForOperand) return;
-    if (nextOperator !== operator && waitingForOperand) {
+    // Only change the operator, but when the calculation is waiting, the calculation is not performed
+    // otherOperators can be calculated directly
+    if (nextOperator !== operator && waitingForOperand && !noInputEqual) {
       this.setState({ operator: nextOperator });
       return;
     }
-
+    // displayValue = error  => 0
     const inputValue = displayValue === "error" ? 0 : parseFloat(displayValue);
 
     // Perform calculation without "=" for otherOperators
@@ -111,42 +154,14 @@ class Calculator extends Component {
         value: inputValue,
       });
     } else if (operatorType) {
+      // value = error =>  0
       const currentValue = value && value !== "error" ? value : 0;
-      let newValue = null;
-      switch (operatorType) {
-        case "+":
-          newValue = currentValue + inputValue;
-          break;
-        case "−":
-          newValue = currentValue - inputValue;
-          break;
-        case "÷":
-          newValue = inputValue === 0 ? "error" : currentValue / inputValue;
-          break;
-        case "×":
-          newValue = currentValue * inputValue;
-          break;
-        case "=":
-          newValue = inputValue;
-          break;
-        case "√":
-          newValue = inputValue >= 0 ? Math.sqrt(inputValue) : "error";
-          break;
-        case "x²":
-          newValue = inputValue * inputValue;
-          break;
-        case "x³":
-          newValue = inputValue * inputValue * inputValue;
-          break;
-        case "x!":
-          let fac = (n) => {
-            return n > 1 ? n * fac(n - 1) : 1;
-          };
-          newValue = fac(inputValue);
-          break;
-        default:
-          break;
-      }
+
+      let newValue = this.getOperationResult(
+        currentValue,
+        inputValue,
+        operatorType
+      );
 
       this.setState({
         value: noInputEqual ? null : newValue,
@@ -155,7 +170,11 @@ class Calculator extends Component {
     }
 
     this.setState({
+      // otherOperators or operatorType is "="  =>  waitingForOperand  is false
+      // otherwise  waitingForOperand is true
       waitingForOperand: noInputEqual || operatorType === "=" ? false : true,
+      // operator is noInputEqual => null
+      // otherwise operator is nextOperator
       operator: noInputEqual ? null : nextOperator,
     });
   }
