@@ -3,7 +3,7 @@ import CalculatorDisplay from "./CalculatorDisplay";
 import CalculatorKeyboard from "./CalculatorKeyboard";
 
 const otherOperators = ["√", "x²", "x³", "x!"];
-
+/*generate the main class calculator */
 class Calculator extends Component {
   state = {
     value: null,
@@ -11,7 +11,7 @@ class Calculator extends Component {
     operator: null,
     waitingForOperand: false,
   };
-
+  /*delete all elements*/
   clearAll() {
     this.setState({
       value: null,
@@ -77,13 +77,14 @@ class Calculator extends Component {
   // Input 0-9.
   inputDigit(digit) {
     const { displayValue, waitingForOperand } = this.state;
-
+    //  input start
     if (waitingForOperand) {
       this.setState({
         displayValue: String(digit),
         waitingForOperand: false,
       });
     } else {
+      //  inputing
       this.setState({
         displayValue:
           displayValue === "0" ? String(digit) : displayValue + digit,
@@ -119,7 +120,7 @@ class Calculator extends Component {
         newValue = inputValue * inputValue * inputValue;
         break;
       case "x!":
-        // Recursion
+        // recursion
         let fac = (n) => {
           return n > 1 ? n * fac(n - 1) : 1;
         };
